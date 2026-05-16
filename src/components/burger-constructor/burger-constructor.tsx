@@ -3,9 +3,11 @@ import { useDispatch, useSelector, RootState } from '../../services/store';
 import { BurgerConstructorUI } from '@ui';
 import { closeOrderModal } from '../../services/burgerConstructor/burgerConstructorSlice';
 import { createOrder } from '../../services/burgerConstructor/burgerConstructorThunks';
+import { useNavigate } from 'react-router-dom';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const bun = useSelector((state: RootState) => state.burgerConstructor.bun);
   const ingredients = useSelector(
@@ -18,6 +20,10 @@ export const BurgerConstructor: FC = () => {
     (state: RootState) => state.burgerConstructor.orderModalData
   );
 
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
   const constructorItems = {
     bun,
     ingredients
@@ -25,7 +31,11 @@ export const BurgerConstructor: FC = () => {
 
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
-    dispatch(createOrder());
+    if (!isAuthenticated) {
+      return navigate('/login', { replace: true });
+    } else {
+      dispatch(createOrder());
+    }
   };
 
   const handleCloseOrderModal = () => {

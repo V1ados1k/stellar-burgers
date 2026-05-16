@@ -15,7 +15,6 @@ import { IngredientDetails, OrderInfo, Modal } from '@components';
 import {
   Routes,
   Route,
-  Navigate,
   useLocation,
   useNavigate,
   Location
@@ -30,6 +29,8 @@ import { AppHeader } from '@components';
 import { Preloader } from '@ui';
 
 import styles from './app.module.css';
+import { fetchUser } from '../../services/auth/authThunks';
+import { ProtectedRoute } from '../routes/ProtectedRoute';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -46,13 +47,10 @@ const App = () => {
     (state: RootState) => state.ingredients.error || state.feed.error
   );
 
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
-
   useEffect(() => {
     dispatch(fetchIngredients());
     dispatch(fetchFeed());
+    dispatch(fetchUser());
   }, [dispatch]);
 
   const closeModal = () => {
@@ -77,70 +75,32 @@ const App = () => {
             <Route path='feed/:number' element={<OrderInfo />} />
             <Route path='ingredients/:id' element={<IngredientDetails />} />
 
-            <Route
-              path='login'
-              element={
-                isAuthenticated ? <Navigate to='/profile' replace /> : <Login />
-              }
-            />
-            <Route
-              path='register'
-              element={
-                isAuthenticated ? (
-                  <Navigate to='/profile' replace />
-                ) : (
-                  <Register />
-                )
-              }
-            />
-            <Route
-              path='forgot-password'
-              element={
-                isAuthenticated ? (
-                  <Navigate to='/profile' replace />
-                ) : (
-                  <ForgotPassword />
-                )
-              }
-            />
-            <Route
-              path='reset-password'
-              element={
-                isAuthenticated ? (
-                  <Navigate to='/profile' replace />
-                ) : (
-                  <ResetPassword />
-                )
-              }
-            />
+            <Route path='login' element={<Login />} />
+            <Route path='register' element={<Register />} />
+            <Route path='forgot-password' element={<ForgotPassword />} />
+            <Route path='reset-password' element={<ResetPassword />} />
             <Route
               path='profile'
               element={
-                isAuthenticated ? (
+                <ProtectedRoute>
                   <Profile />
-                ) : (
-                  <Navigate to='/login' state={{ from: location }} replace />
-                )
+                </ProtectedRoute>
               }
             />
             <Route
               path='profile/orders'
               element={
-                isAuthenticated ? (
+                <ProtectedRoute>
                   <ProfileOrders />
-                ) : (
-                  <Navigate to='/login' state={{ from: location }} replace />
-                )
+                </ProtectedRoute>
               }
             />
             <Route
               path='profile/orders/:number'
               element={
-                isAuthenticated ? (
+                <ProtectedRoute>
                   <OrderInfo />
-                ) : (
-                  <Navigate to='/login' state={{ from: location }} replace />
-                )
+                </ProtectedRoute>
               }
             />
             <Route path='*' element={<NotFound404 />} />
@@ -167,13 +127,9 @@ const App = () => {
               <Route
                 path='profile/orders/:number'
                 element={
-                  isAuthenticated ? (
-                    <Modal onClose={closeModal} title='Детали заказа'>
-                      <OrderInfo />
-                    </Modal>
-                  ) : (
-                    <Navigate to='/login' state={{ from: location }} replace />
-                  )
+                  <Modal onClose={closeModal} title='Детали заказа'>
+                    <OrderInfo />
+                  </Modal>
                 }
               />
             </Routes>

@@ -69,7 +69,6 @@ export const fetchUser = () => async (dispatch: AppDispatch) => {
     return response.user;
   } catch (err: any) {
     dispatch(authError(err?.message || 'Ошибка получения пользователя'));
-    return Promise.reject(err);
   }
 };
 

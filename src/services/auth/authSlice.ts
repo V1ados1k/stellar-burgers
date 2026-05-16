@@ -8,6 +8,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   updateUserError: string | null;
+  isAuthChecked: boolean;
 }
 
 const initialState: AuthState = {
@@ -15,7 +16,8 @@ const initialState: AuthState = {
   isAuthenticated: false,
   loading: false,
   error: null,
-  updateUserError: null
+  updateUserError: null,
+  isAuthChecked: true
 };
 
 const authSlice = createSlice({
@@ -31,10 +33,13 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
       state.error = null;
+      state.isAuthChecked = false;
     },
     authError(state, action) {
       state.loading = false;
       state.error = action.payload;
+      state.isAuthenticated = false;
+      state.isAuthChecked = false;
     },
     updateUserStart(state) {
       state.loading = true;
@@ -55,6 +60,11 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
       state.updateUserError = null;
+      state.isAuthChecked = false;
+    },
+    authCheckStart(state) {
+      state.isAuthChecked = true;
+      state.error = null;
     }
   }
 });
@@ -66,7 +76,8 @@ export const {
   updateUserStart,
   updateUserSuccess,
   updateUserError,
-  logoutSuccess
+  logoutSuccess,
+  authCheckStart
 } = authSlice.actions;
 
 export const selectUser = (state: RootState) => state.auth.user;

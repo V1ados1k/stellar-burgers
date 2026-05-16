@@ -51,6 +51,28 @@ const burgerConstructorSlice = createSlice({
     },
     closeOrderModal(state) {
       state.orderModalData = null;
+    },
+    moveIngredientUp(state, action) {
+      const index = state.ingredients.findIndex(
+        (item) => item.id === action.payload
+      );
+
+      if (index <= 0) return;
+
+      const temp = state.ingredients[index];
+      state.ingredients[index] = state.ingredients[index - 1];
+      state.ingredients[index - 1] = temp;
+    },
+    moveIngredientDown(state, action) {
+      const index = state.ingredients.findIndex(
+        (item) => item.id === action.payload
+      );
+
+      if (index === -1 || index >= state.ingredients.length - 1) return;
+
+      const temp = state.ingredients[index];
+      state.ingredients[index] = state.ingredients[index + 1];
+      state.ingredients[index + 1] = temp;
     }
   }
 });
@@ -63,7 +85,9 @@ export const {
   orderRequestStart,
   orderRequestSuccess,
   orderRequestError,
-  closeOrderModal
+  closeOrderModal,
+  moveIngredientUp,
+  moveIngredientDown
 } = burgerConstructorSlice.actions;
 
 export default burgerConstructorSlice.reducer;
