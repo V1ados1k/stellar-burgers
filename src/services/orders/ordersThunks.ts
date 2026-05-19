@@ -1,9 +1,10 @@
 import { AppDispatch } from '../store';
-import { getOrdersApi } from '@api';
+import { getOrderByNumberApi, getOrdersApi } from '@api';
 import {
   fetchOrdersStart,
   fetchOrdersSuccess,
-  fetchOrdersError
+  fetchOrdersError,
+  setCurrentOrder
 } from './ordersSlice';
 
 export const fetchOrders = () => async (dispatch: AppDispatch) => {
@@ -16,3 +17,13 @@ export const fetchOrders = () => async (dispatch: AppDispatch) => {
     dispatch(fetchOrdersError(err?.message || 'Ошибка получения заказов'));
   }
 };
+
+export const getOrderByNumber =
+  (number: number) => async (dispatch: AppDispatch) => {
+    try {
+      const numOrder = await getOrderByNumberApi(number);
+      dispatch(setCurrentOrder(numOrder));
+    } catch (err: any) {
+      dispatch(fetchOrdersError(err.message));
+    }
+  };

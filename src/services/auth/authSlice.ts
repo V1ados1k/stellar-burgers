@@ -8,7 +8,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   updateUserError: string | null;
-  isAuthChecked: boolean;
+  authCheckLoading: boolean;
 }
 
 const initialState: AuthState = {
@@ -17,7 +17,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   updateUserError: null,
-  isAuthChecked: true
+  authCheckLoading: true
 };
 
 const authSlice = createSlice({
@@ -33,13 +33,13 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
       state.error = null;
-      state.isAuthChecked = false;
+      state.authCheckLoading = false;
     },
     authError(state, action) {
       state.loading = false;
       state.error = action.payload;
       state.isAuthenticated = false;
-      state.isAuthChecked = false;
+      state.authCheckLoading = false;
     },
     updateUserStart(state) {
       state.loading = true;
@@ -60,10 +60,10 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
       state.updateUserError = null;
-      state.isAuthChecked = false;
+      state.authCheckLoading = false;
     },
     authCheckStart(state) {
-      state.isAuthChecked = true;
+      state.authCheckLoading = true;
       state.error = null;
     }
   }

@@ -7,6 +7,8 @@ import {
   clearConstructor
 } from './burgerConstructorSlice';
 import type { RootState } from '../store';
+import { fetchFeed } from '../Feed/feedThunks';
+import { fetchOrders } from '../orders/ordersThunks';
 
 export const createOrder =
   () => async (dispatch: AppDispatch, getState: () => RootState) => {
@@ -25,6 +27,8 @@ export const createOrder =
     try {
       const data = await orderBurgerApi(ingredientsIds);
       dispatch(orderRequestSuccess(data.order));
+      dispatch(fetchFeed());
+      dispatch(fetchOrders());
       dispatch(clearConstructor());
     } catch (err: any) {
       dispatch(orderRequestError(err?.message || 'Ошибка заказа'));
