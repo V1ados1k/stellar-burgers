@@ -1,12 +1,13 @@
+/// <reference types="node" />
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
 test.describe('Интеграционные тесты конструктора бургера', () => {
   const base = process.env.BASE_URL || 'http://localhost:3000';
-  const harPath = path.join(__dirname, 'hars', 'backend.har');
+  const harPath = path.join(__dirname, '..', 'hars', 'backend.har');
 
   test.beforeEach(async ({ page }) => {
-    await page.routeFromHAR({ har: harPath });
+    await page.routeFromHAR(harPath, { update: false });
 
     await page.context().addInitScript(() => {
       try {
@@ -27,7 +28,7 @@ test.describe('Интеграционные тесты конструктора 
     await context.clearCookies();
   });
 
-  test('Добавление ингредиента, открытие/закрытие модального окна и создание заказа', async ({ page }) => {
+  test('Добавление ингредиентов в конструктор', async ({ page }) => {
     await page.goto(base);
 
     await expect(page.locator('text=Булки')).toBeVisible();
@@ -36,33 +37,51 @@ test.describe('Интеграционные тесты конструктора 
     await addButtons.first().click();
     await addButtons.nth(1).click();
 
-    await expect(page.locator('text=Test Bun (верх)')).toBeVisible();
-    await expect(page.locator('text=Test Meat')).toBeVisible();
+    const constructorSection = page.locator('[class*="constructor"]');
+    await expect(constructorSection.locator('text=Test Bun (верх)')).toBeVisible();
+    await expect(constructorSection.locator('text=Test Meat')).toBeVisible();
+  });
+
+  test('Открытие и закрытие модального окна ингредиента', async ({ page }) => {
+    await page.goto(base);
 
     const ingredientLink = page.locator('a[href="/ingredients/main-1"]').first();
     await ingredientLink.click();
 
-    await expect(page.locator('h3', { hasText: 'Детали ингредиента' })).toBeVisible();
-    await expect(page.locator('h3', { hasText: 'Test Meat' })).toBeVisible();
+    const modal = page.locator('[class*="modal"]').first();
+    await expect(modal.locator('h3', { hasText: 'Детали ингредиента' })).toBeVisible();
+    await expect(modal.locator('h3', { hasText: 'Test Meat' })).toBeVisible();
 
-    const title = page.locator('h3', { hasText: 'Детали ингредиента' }).first();
-    await title.locator('xpath=..').locator('button').click();
-    await expect(page.locator('h3', { hasText: 'Детали ингредиента' })).toBeHidden();
+    const closeButton = modal.locator('button').last();
+    await closeButton.click();
+    await expect(modal).toBeHidden();
 
     await ingredientLink.click();
-    await expect(page.locator('h3', { hasText: 'Детали ингредиента' })).toBeVisible();
+    const modalAgain = page.locator('[class*="modal"]').first();
+    await expect(modalAgain.locator('h3', { hasText: 'Детали ингредиента' })).toBeVisible();
 
     await page.mouse.click(0, 0);
-    await expect(page.locator('h3', { hasText: 'Детали ингредиента' })).toBeHidden();
+    await expect(modalAgain).toBeHidden();
+  });
+
+  test('Оформление заказа и проверка модального окна', async ({ page }) => {
+    await page.goto(base);
+
+    const addButtons = page.locator('button', { hasText: 'Добавить' });
+    await addButtons.first().click();
+    await addButtons.nth(1).click();
 
     await page.locator('button', { hasText: 'Оформить заказ' }).click();
-    await expect(page.locator('h2', { hasText: '123' })).toBeVisible();
 
-    const orderTitle = page.locator('h2', { hasText: '123' }).first();
-    await orderTitle.locator('xpath=../..').locator('button').click();
-    await expect(page.locator('h2', { hasText: '123' })).toBeHidden();
+    const orderModal = page.locator('[class*="modal"]').first();
+    await expect(orderModal.locator('h2', { hasText: '123' })).toBeVisible();
 
-    await expect(page.locator('text=Выберите булки')).toBeVisible();
-    await expect(page.locator('text=Выберите начинку')).toBeVisible();
+    const orderCloseButton = orderModal.locator('button').last();
+    await orderCloseButton.click();
+    await expect(orderModal).toBeHidden();
+
+    const constructorSection = page.locator('[class*="constructor"]');
+    await expect(constructorSection.locator('text=Выберите булки')).toBeVisible();
+    await expect(constructorSection.locator('text=Выберите начинку')).toBeVisible();
   });
 });

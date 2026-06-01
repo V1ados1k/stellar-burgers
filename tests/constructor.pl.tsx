@@ -8,7 +8,7 @@ test.describe('Интеграционные тесты конструктора 
   test.beforeEach(async ({ page }) => {
     const harPath = path.join(__dirname, 'hars', 'backend.har');
     try {
-      await page.routeFromHAR({ har: harPath });
+      await page.routeFromHAR(harPath, { update: false });
     } catch (e) {
       const fixturePath = path.join(__dirname, 'hars', 'ingredients.json');
       const raw = await fs.promises.readFile(fixturePath, 'utf8');
